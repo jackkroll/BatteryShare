@@ -80,11 +80,12 @@ struct BatteryShareApp: App {
         }
         .menuBarExtraStyle(.menu)
         .modelContainer(sharedModelContainer)
-        #endif
+        #else
         WindowGroup {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+        #endif
     }
 }
 

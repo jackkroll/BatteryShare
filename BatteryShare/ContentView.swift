@@ -4,43 +4,74 @@
 //
 //  Created by Jack Kroll on 2/26/26.
 //
-
+#if os(macOS)
+#else
 import SwiftUI
 import SwiftData
 import Shimmer
+import iCloudSyncStatusKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
+    @AppStorage("macName") var macName: String = "My Mac"
     @Query private var recentStatus: [BatteryStatus]
     @State var lastStatus : BatteryStatus?
+    @State var displaySettings: Bool = false
+    @State var quotaExceeded: Bool = false
+    @State private var syncManager = SyncStatusAsyncManager(
+        cloudKitContainerID: "iCloud.com.JackKroll.BatteryShare",
+    )
+    
     var body: some View {
         NavigationStack {
             VStack {
                 if recentStatus.isEmpty {
-                    Text("No battery status available")
+                    VStack {
+                        Text("Battery status never synced")
+                            .font(.title3)
+                            .bold()
+                        if !syncManager.isAccountAvailable && !syncManager.isCloudDriveAvailable {
+                            Text("Please sign into iCloud on your device in Settings")
+                        }
+                        if syncManager.isAccountAvailable && !syncManager.isCloudDriveAvailable {
+                            Text("Please enable iCloud Drive in Settings")
+                        }
+                        if syncManager.isAccountAvailable && syncManager.isCloudDriveAvailable {
+                            Text("Install BatteryShare on your Mac to sync battery status")
+                        }
+                    }
                 } else {
                     if lastStatus != nil {
-                        /*
-                        HStack {
-                            if let lastCharge = lastStatus.currentCharge {
-                                Gauge(value: Float(lastCharge)/100) {
-                                    Image(systemName: "macbook")
+                        if let timestamp = lastStatus?.timestamp {
+                            if timestamp.distance(to: .now) > 10 * 60 && !syncManager.isSyncing{
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
                                         .resizable()
                                         .scaledToFit()
-                                        .padding(2)
+                                        .frame(width: 20)
+                                        .symbolRenderingMode(.multicolor)
+                                    if syncManager.environmentStatus.isSyncReady {
+                                        Text("Sync was a while ago, is BatteryShare running on your Mac?")
+                                    }
                                 }
-                                .gaugeStyle(.accessoryCircularCapacity)
-                                
+                                .font(.caption)
+                                .bold()
+                                .frame(maxWidth: .infinity)
+                                .padding(10)
+                                .glassEffect()
                             }
-                        }
-                         */
-                        
-                        if let timestamp = lastStatus?.timestamp {
                             HStack {
                                 HStack {
-                                    Text("Last Synced:")
-                                    Text(timestamp, style: .time)
-                                        .contentTransition(.numericText())
+                                    if syncManager.isSyncing {
+                                        Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.icloud.fill")
+                                        Text("Syncing...")
+                                    }
+                                    else {
+                                        Text("Last Synced:")
+                                        Text(timestamp, style: .time)
+                                            .contentTransition(.numericText())
+                                    }
                                 }
                                 
                                 .padding(10)
@@ -51,7 +82,7 @@ struct ContentView: View {
                                     Text(lastStatus?.isCharging ?? false ? "Charging" : "On Battery")
                                 }
                                 .shimmering(active: lastStatus?.isCharging ?? false)
-                                .brightness(lastStatus?.isCharging ?? false ? 1.2 : 0)
+                                .brightness(lastStatus?.isCharging ?? false && colorScheme == .dark ? 1.2 : 0)
                                 .padding(10)
                                 .glassEffect()
                                 
@@ -74,7 +105,7 @@ struct ContentView: View {
                                 .shimmering(active: false)
                                 .frame(maxWidth: .infinity)
                                 .contentTransition(.numericText())
-                            
+
                                 Gauge(value: Float(lastCharge)/100) {
                                 }
                                 .gaugeStyle(VerticalAccessoryGaugeStyle())
@@ -115,7 +146,7 @@ struct ContentView: View {
                 }
             }
             .padding(.horizontal)
-            .navigationTitle("My Mac")
+            .navigationTitle(macName)
             .onAppear {
                 withAnimation {
                     lastStatus = recentStatus.sorted { (a, b) in
@@ -130,15 +161,38 @@ struct ContentView: View {
                         }.first
                 }
             }
+            .sheet(isPresented: $displaySettings) {
+                SettingSheet()
+                    .presentationDetents([.fraction(1/4)])
+            }
+            .toolbar {
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        withAnimation {
+                            displaySettings = true
+                        }
+                    } label: {
+                        Image(systemName: "gear")
+                    }
+                    
+                }
+                ToolbarSpacer(placement: .bottomBar)
+            }
         }
+        
+        
+       
+    }
+    func quotaExceededNotice() -> Void {
+        quotaExceeded = true
     }
 }
-/*
+
 #Preview {
     ContentView()
         .modelContainer(for: BatteryStatus.self, inMemory: true)
 }
- */
+ 
 #Preview("With Example Battery Status") {
     do {
         let container = try ModelContainer(
@@ -165,4 +219,6 @@ struct ContentView: View {
             .modelContainer(for: BatteryStatus.self, inMemory: true)
     }
 }
+
+#endif
 

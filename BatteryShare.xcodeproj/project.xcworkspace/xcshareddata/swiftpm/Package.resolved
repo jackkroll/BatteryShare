@@ -1,6 +1,24 @@
 {
-  "originHash" : "400e80efd90c05d50f94767717f9679a180a664ace23ebc82547b1a892b1bee8",
+  "originHash" : "b20f882768662d0e5f79ea54d1299923515078baa6776a74bcdc3f7db15dfe0a",
   "pins" : [
+    {
+      "identity" : "icloudsyncstatuskit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fatbobman/iCloudSyncStatusKit.git",
+      "state" : {
+        "revision" : "a6884f42d5a6139b74e2cd2f3c6be18cdb1f5847",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "simplelogger",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fatbobman/SimpleLogger.git",
+      "state" : {
+        "revision" : "97691d5dd27947397b2ac2cc91f6bc75960ebd4e",
+        "version" : "0.9.2"
+      }
+    },
     {
       "identity" : "swiftui-shimmer",
       "kind" : "remoteSourceControl",

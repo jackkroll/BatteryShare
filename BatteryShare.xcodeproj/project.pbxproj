@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		568678B32F53CF7C0085BEA3 /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 568678B22F53CF7C0085BEA3 /* Shimmer */; };
+		56E86DBD2F54E050005685FE /* iCloudSyncStatusKit in Frameworks */ = {isa = PBXBuildFile; productRef = 56E86DBC2F54E050005685FE /* iCloudSyncStatusKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56E86DBD2F54E050005685FE /* iCloudSyncStatusKit in Frameworks */,
 				568678B32F53CF7C0085BEA3 /* Shimmer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,6 +86,7 @@
 			name = BatteryShare;
 			packageProductDependencies = (
 				568678B22F53CF7C0085BEA3 /* Shimmer */,
+				56E86DBC2F54E050005685FE /* iCloudSyncStatusKit */,
 			);
 			productName = BatteryShare;
 			productReference = 56DC60D82F511F8C00F02967 /* BatteryShare.app */;
@@ -115,6 +118,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				568678B12F53CF7C0085BEA3 /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
+				56E86DBB2F54E050005685FE /* XCRemoteSwiftPackageReference "iCloudSyncStatusKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56DC60D92F511F8C00F02967 /* Products */;
@@ -409,6 +413,14 @@
 				minimumVersion = 1.5.1;
 			};
 		};
+		56E86DBB2F54E050005685FE /* XCRemoteSwiftPackageReference "iCloudSyncStatusKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/fatbobman/iCloudSyncStatusKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -416,6 +428,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 568678B12F53CF7C0085BEA3 /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
 			productName = Shimmer;
+		};
+		56E86DBC2F54E050005685FE /* iCloudSyncStatusKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56E86DBB2F54E050005685FE /* XCRemoteSwiftPackageReference "iCloudSyncStatusKit" */;
+			productName = iCloudSyncStatusKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

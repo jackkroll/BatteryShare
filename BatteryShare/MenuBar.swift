@@ -18,9 +18,13 @@ struct MenuBar: View {
     @State var launchOnLogin: Bool? = nil
     var body: some View {
         VStack {
-            Text(selectedBattery?.currentCharge?.formatted(.percent) ?? "Unknown Charge state")
-                .fontWeight(.bold)
-                .foregroundStyle(selectedBattery?.isLowPower ?? false ? .yellow : .primary)
+            if let timestamp = selectedBattery?.timestamp {
+                Text("Last synced: \(Int((timestamp.distance(to: .now))/60)) minutes ago")
+            }
+            else {
+                Text("Not synced yet")
+            }
+            
             /*if let estDepleteTime = battery?.estDepleteTime {
                 HStack {
                     Text(Date.now + estDepleteTime, style: .relative)
