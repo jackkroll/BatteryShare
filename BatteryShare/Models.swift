@@ -10,6 +10,7 @@ import SwiftData
 
 @Model
 final class BatteryStatus {
+    var deviceID: String?
     var deviceType: DeviceType?
     var timestamp: Date?
     var currentCharge: Int?
@@ -19,6 +20,7 @@ final class BatteryStatus {
     var estDepleteTime: TimeInterval?
     
     init(deviceType: DeviceType? = nil, currentCharge: Int? = nil, isCharging: Bool? = nil, isLowPower: Bool? = nil, estChargeTime: Double? = nil, estDepleteTime: Double? = nil) {
+        self.deviceID = DeviceIdentityManager.getDeviceIdentifier()
         self.timestamp = .now
         self.deviceType = deviceType
         self.currentCharge = currentCharge
@@ -29,6 +31,16 @@ final class BatteryStatus {
     }
     
     enum DeviceType: String, Codable {
-        case mac, iphone
+        case mac, iphone, ipad
+    }
+}
+
+struct DeviceBatteryStatus {
+    var deviceNickname: String
+    var status: BatteryStatus
+    
+    init(deviceNickname: String, status: BatteryStatus) {
+        self.deviceNickname = deviceNickname
+        self.status = status
     }
 }

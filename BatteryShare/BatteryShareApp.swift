@@ -10,10 +10,20 @@ import SwiftData
 
 @main
 struct BatteryShareApp: App {
+    private let sharedModelContainer: ModelContainer
+
     #if os(macOS)
     @State private var scheduler = NSBackgroundActivityScheduler(identifier: "com.JackKroll.BatteryShare.report")
+    #endif
 
     init() {
+        do {
+            sharedModelContainer = try BatteryStoreConfiguration.makeSharedModelContainer()
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+
+        #if os(macOS)
         let container = sharedModelContainer
         scheduler.repeats = true
         scheduler.interval = 5 * 60 // Repeat every 5 minutes
@@ -27,6 +37,7 @@ struct BatteryShareApp: App {
                     container.mainContext.insert(battery)
                     do {
                         try container.mainContext.save()
+                        BatteryWidgetReloader.reloadAllTimelines()
                     } catch {
                         completion(.deferred)
                         return
@@ -49,6 +60,7 @@ struct BatteryShareApp: App {
                             container.mainContext.delete(old)
                         }
                         try? container.mainContext.save()
+                        BatteryWidgetReloader.reloadAllTimelines()
                     }
                 } catch {
                     // Ignore pruning errors; the next cycle can try again
@@ -56,28 +68,17 @@ struct BatteryShareApp: App {
                 completion(.finished)
             }
         }
+        #endif
     }
-    #endif
-    
-        var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            BatteryStatus.self,
-        ])
-        let modelConfiguration = ModelConfiguration("iCloud.JackKroll.BatteryShare", schema: schema, isStoredInMemoryOnly: false, allowsSave: true, cloudKitDatabase: .automatic)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
 
     var body: some Scene {
         #if os(macOS)
         MenuBarExtra("Test" ,systemImage: "bolt.fill"){
             MenuBar()
                 .modelContainer(sharedModelContainer)
-        }
+        } /*label: {
+            MenuBarLabel()
+        }*/
         .menuBarExtraStyle(.menu)
         .modelContainer(sharedModelContainer)
         #else
@@ -88,4 +89,3 @@ struct BatteryShareApp: App {
         #endif
     }
 }
-

@@ -9,10 +9,37 @@
 /* Begin PBXBuildFile section */
 		568678B32F53CF7C0085BEA3 /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 568678B22F53CF7C0085BEA3 /* Shimmer */; };
 		56E86DBD2F54E050005685FE /* iCloudSyncStatusKit in Frameworks */ = {isa = PBXBuildFile; productRef = 56E86DBC2F54E050005685FE /* iCloudSyncStatusKit */; };
+		A10000012F60000100000001 /* BatteryShareWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A10000022F60000100000002 /* BatteryShareWidgets.appex */; platformFilter = ios; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A100000F2F6000010000000F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 56DC60D02F511F8C00F02967 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A100000B2F6000010000000B;
+			remoteInfo = BatteryShareWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		56E86DDD2F54EB0B005685FE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A10000012F60000100000001 /* BatteryShareWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		56DC60D82F511F8C00F02967 /* BatteryShare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BatteryShare.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		56E86DC62F54EB0A005685FE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		A10000022F60000100000002 /* BatteryShareWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BatteryShareWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -23,6 +50,28 @@
 			);
 			target = 56DC60D72F511F8C00F02967 /* BatteryShare */;
 		};
+		A10000032F60000100000003 /* Exceptions for "BatteryShare" folder in "BatteryShareWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				BatteryShare.icon,
+				BatteryShareApp.swift,
+				ContentView.swift,
+				Info.plist,
+				MenuBar.swift,
+				SettingSheet.swift,
+				SingleDeviceView.swift,
+				VerticalAccessoryGaugeStyle.swift,
+			);
+			target = A100000B2F6000010000000B /* BatteryShareWidgets */;
+		};
+		A10000042F60000100000004 /* Exceptions for "BatteryShareWidgets" folder in "BatteryShareWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A100000B2F6000010000000B /* BatteryShareWidgets */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -30,8 +79,17 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				56DC60E52F511F8D00F02967 /* Exceptions for "BatteryShare" folder in "BatteryShare" target */,
+				A10000032F60000100000003 /* Exceptions for "BatteryShare" folder in "BatteryShareWidgets" target */,
 			);
 			path = BatteryShare;
+			sourceTree = "<group>";
+		};
+		A10000072F60000100000007 /* BatteryShareWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A10000042F60000100000004 /* Exceptions for "BatteryShareWidgets" folder in "BatteryShareWidgets" target */,
+			);
+			path = BatteryShareWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -46,6 +104,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000082F60000100000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -53,6 +118,8 @@
 			isa = PBXGroup;
 			children = (
 				56DC60DA2F511F8C00F02967 /* BatteryShare */,
+				A10000072F60000100000007 /* BatteryShareWidgets */,
+				56E86DC32F54EB0A005685FE /* Frameworks */,
 				56DC60D92F511F8C00F02967 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,8 +128,17 @@
 			isa = PBXGroup;
 			children = (
 				56DC60D82F511F8C00F02967 /* BatteryShare.app */,
+				A10000022F60000100000002 /* BatteryShareWidgets.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		56E86DC32F54EB0A005685FE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				56E86DC62F54EB0A005685FE /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -75,10 +151,12 @@
 				56DC60D42F511F8C00F02967 /* Sources */,
 				56DC60D52F511F8C00F02967 /* Frameworks */,
 				56DC60D62F511F8C00F02967 /* Resources */,
+				56E86DDD2F54EB0B005685FE /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A10000102F60000100000010 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				56DC60DA2F511F8C00F02967 /* BatteryShare */,
@@ -92,6 +170,29 @@
 			productReference = 56DC60D82F511F8C00F02967 /* BatteryShare.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A100000B2F6000010000000B /* BatteryShareWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000142F60000100000014 /* Build configuration list for PBXNativeTarget "BatteryShareWidgets" */;
+			buildPhases = (
+				A10000092F60000100000009 /* Sources */,
+				A10000082F60000100000008 /* Frameworks */,
+				A100000A2F6000010000000A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				56DC60DA2F511F8C00F02967 /* BatteryShare */,
+				A10000072F60000100000007 /* BatteryShareWidgets */,
+			);
+			name = BatteryShareWidgets;
+			packageProductDependencies = (
+			);
+			productName = BatteryShareWidgets;
+			productReference = A10000022F60000100000002 /* BatteryShareWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -103,6 +204,9 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					56DC60D72F511F8C00F02967 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					A100000B2F6000010000000B = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -126,12 +230,20 @@
 			projectRoot = "";
 			targets = (
 				56DC60D72F511F8C00F02967 /* BatteryShare */,
+				A100000B2F6000010000000B /* BatteryShareWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		56DC60D62F511F8C00F02967 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A100000A2F6000010000000A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -148,13 +260,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000092F60000100000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A10000102F60000100000010 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A100000B2F6000010000000B /* BatteryShareWidgets */;
+			targetProxy = A100000F2F6000010000000F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		56DC60E72F511F8D00F02967 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = BatteryShare;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = BatteryShare/BatteryShare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -176,6 +303,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BatteryShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BatteryShare;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -187,23 +316,25 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.JackKroll.BatteryShare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -211,7 +342,7 @@
 		56DC60E82F511F8D00F02967 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = BatteryShare;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = BatteryShare/BatteryShare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -233,6 +364,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BatteryShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BatteryShare;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -244,23 +377,25 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.JackKroll.BatteryShare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -381,6 +516,78 @@
 			};
 			name = Release;
 		};
+		A10000122F60000100000012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = BatteryShareWidgets/BatteryShareWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = ZS9H682SJQ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BatteryShareWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.JackKroll.BatteryShare.BatteryShareWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A10000132F60000100000013 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = BatteryShareWidgets/BatteryShareWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = ZS9H682SJQ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BatteryShareWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.JackKroll.BatteryShare.BatteryShareWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -398,6 +605,15 @@
 			buildConfigurations = (
 				56DC60E72F511F8D00F02967 /* Debug */,
 				56DC60E82F511F8D00F02967 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000142F60000100000014 /* Build configuration list for PBXNativeTarget "BatteryShareWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000122F60000100000012 /* Debug */,
+				A10000132F60000100000013 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

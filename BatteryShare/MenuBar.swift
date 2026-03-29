@@ -24,6 +24,13 @@ struct MenuBar: View {
             else {
                 Text("Not synced yet")
             }
+            Button("Sync Now") {
+                let battery = fetchBatteryStatus()
+                if let battery = battery {
+                    modelContext.insert(battery)
+                }
+            }
+            .keyboardShortcut("s")
             
             /*if let estDepleteTime = battery?.estDepleteTime {
                 HStack {
@@ -63,6 +70,73 @@ struct MenuBar: View {
             selectedBattery = battery.last
         }
         .padding()
+    }
+}
+
+struct MenuBarLabel: View {
+    @Query(sort: [SortDescriptor<BatteryStatus>(\.timestamp)]) private var battery: [BatteryStatus]
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 60)) { _ in
+            Label {
+                Text(menuBarTitle)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+            } icon: {
+                Image(systemName: menuBarIcon)
+            }
+        }
+    }
+
+    private var menuBarTitle: String {
+        guard let status = battery.last else {
+            return "Share • No Sync"
+        }
+
+        let deviceText: String
+        switch status.deviceType {
+        case .some(.iphone):
+            deviceText = "iPhone"
+        case .some(.mac):
+            deviceText = "Mac"
+        case .none:
+            deviceText = "Share"
+        case .some(.ipad):
+            deviceText = "iPad"
+        }
+
+        let percentText = status.currentCharge.map { "\($0)%" } ?? "--"
+        let ageText = status.timestamp.map { formatAge($0) } ?? "--"
+        return "\(deviceText) \(percentText) • \(ageText)"
+    }
+
+    private var menuBarIcon: String {
+        switch battery.last?.deviceType {
+        case .some(.iphone):
+            return "iphone"
+        case .some(.mac):
+            return "macbook"
+        case .some(.ipad):
+            return "ipad"
+        case .none:
+            return "arrow.triangle.2.circlepath"
+        }
+    }
+
+    private func formatAge(_ date: Date) -> String {
+        let minutes = max(0, Int(abs(date.timeIntervalSinceNow) / 60))
+        if minutes < 1 {
+            return "now"
+        }
+        if minutes < 60 {
+            return "\(minutes)m"
+        }
+        let hours = minutes / 60
+        if hours < 24 {
+            return "\(hours)h"
+        }
+        let days = hours / 24
+        return "\(days)d"
     }
 }
 
@@ -111,4 +185,3 @@ func fetchBatteryStatus() -> BatteryStatus? {
         .modelContainer(for: BatteryStatus.self, inMemory: true)
 }
 #endif
-

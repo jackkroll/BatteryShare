@@ -5,8 +5,9 @@
 //  Created by Jack Kroll on 3/1/26.
 //
 
+#if os(macOS)
+#else
 import SwiftUI
-
 struct SettingSheet: View {
     @Environment(\.dismiss) var dismiss
     @AppStorage("macName") var macName: String = "My Mac"
@@ -34,3 +35,4 @@ struct SettingSheet: View {
 #Preview {
     SettingSheet()
 }
+#endif

@@ -1,0 +1,55 @@
+{
+  "fill" : "system-light",
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "blend-mode-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "normal"
+            }
+          ],
+          "glass" : false,
+          "image-name" : "battery.svg",
+          "name" : "battery",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              5.1484375,
+              43.1328125
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:0.41765,0.79535,0.43769,1.00000"
+          },
+          "image-name" : "cloud.svg",
+          "name" : "cloud",
+          "position" : {
+            "scale" : 1.75,
+            "translation-in-points" : [
+              -15.734375,
+              -70.6
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
