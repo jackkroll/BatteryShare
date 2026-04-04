@@ -11,14 +11,15 @@ import Shimmer
 
 struct SingleDeviceView: View {
     @Environment(\.colorScheme) var colorScheme
-    @State var syncManager: SyncStatusAsyncManager
-    @State var deviceStatus: DeviceBatteryStatus
+    let deviceStatus: BatteryStatus
+    let deviceNickname: String
     @State var showDeviceID: Bool = false
+    @State var editSheetIsPresented: Bool = false
     var body: some View {
         VStack {
             Group {
                 HStack {
-                    Text(deviceStatus.deviceNickname)
+                    Text(deviceNickname)
                         .font(.title)
                         .fontWeight(.bold)
                         .onTapGesture {
@@ -27,69 +28,67 @@ struct SingleDeviceView: View {
                             }
                         }
                     Spacer()
+                    Button {
+                        withAnimation {
+                            editSheetIsPresented = true
+                        }
+                    } label: {
+                        Image(systemName: "pencil")
+                            .padding(5)
+                    }
+                    .buttonBorderShape(.circle)
+                    .buttonStyle(.glass)
+                    .sheet(isPresented: $editSheetIsPresented) {
+                        SettingSheet(batteryStatus: deviceStatus)
+                            .presentationDetents([.fraction(1/3)])
+                    }
                 }
                 .padding(.top, 8)
                 if showDeviceID {
-                    HStack {
-                        Text(deviceStatus.status.deviceID ?? "ID")
-                            .fontDesign(.monospaced)
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
-                        Spacer()
+                    VStack {
+                        HStack {
+                            Text(deviceStatus.deviceID ?? "ID")
+                                
+                            Spacer()
+                        }
+                        HStack {
+                            Text(deviceStatus.deviceType?.rawValue ?? "Device")
+                        }
                     }
+                    .fontDesign(.monospaced)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
                 }
             }
             .padding(.horizontal, 8)
-            if let timestamp = deviceStatus.status.timestamp {
-                if timestamp.distance(to: .now) > 10 * 60 && !syncManager.isSyncing{
-                    HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20)
-                            .symbolRenderingMode(.multicolor)
-                        if syncManager.environmentStatus.isSyncReady {
-                            Text("Sync was a while ago, is BatteryShare running on your Mac?")
-                        }
-                    }
-                    .font(.caption)
-                    .bold()
-                    .frame(maxWidth: .infinity)
-                    .padding(10)
-                    .glassEffect()
-                }
+            if let timestamp = deviceStatus.timestamp {
                 HStack {
                     HStack {
-                        if syncManager.isSyncing {
-                            Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.icloud.fill")
-                            Text("Syncing...")
-                        }
-                        else {
-                            Text("Last Synced:")
-                            Text(timestamp, style: .time)
-                                .contentTransition(.numericText())
-                        }
+                        Text("Last Synced:")
+                            .lineLimit(1)
+                        Text(timestamp, style: .time)
+                            .contentTransition(.numericText())
                     }
-                    
                     .padding(10)
                     .glassEffect()
                     
                     HStack {
-                        Image(systemName: deviceStatus.status.isCharging ?? false ? "bolt.fill" : "battery.100percent")
-                        Text(deviceStatus.status.isCharging ?? false ? "Charging" : "On Battery")
+                        Image(systemName: deviceStatus.isCharging ?? false ? "bolt.fill" : "battery.100percent")
+                        Text(deviceStatus.isCharging ?? false ? "Charging" : "On Battery")
                     }
-                    .shimmering(active: deviceStatus.status.isCharging ?? false)
-                    .brightness(deviceStatus.status.isCharging ?? false && colorScheme == .dark ? 1.2 : 0)
+                    .shimmering(active: deviceStatus.isCharging ?? false)
+                    .brightness(deviceStatus.isCharging ?? false && colorScheme == .dark ? 1.2 : 0)
                     .padding(10)
                     .glassEffect()
                     
                     Spacer()
                 }
+                .frame(maxWidth: .infinity)
                 .font(.caption)
                 .bold()
                 .foregroundStyle(.secondary)
             }
-            if let lastCharge = deviceStatus.status.currentCharge {
+            if let lastCharge = deviceStatus.currentCharge {
                 HStack {
                     Text("\(lastCharge)%")
                         .fontDesign(.monospaced)
@@ -111,8 +110,8 @@ struct SingleDeviceView: View {
                 }
                 .frame(maxHeight: 144)
             }
-            if let timeUntilEmpty = deviceStatus.status.estDepleteTime,
-               let timeUntilCharge = deviceStatus.status.estChargeTime {
+            if let timeUntilEmpty = deviceStatus.estDepleteTime,
+               let timeUntilCharge = deviceStatus.estChargeTime {
                 Group {
                     if timeUntilCharge > 0 {
                         VStack {
@@ -150,14 +149,16 @@ struct SingleDeviceView: View {
 }
 
 #Preview {
-    @Previewable @State var status = DeviceBatteryStatus(deviceNickname: "My Macbook Pro", status: BatteryStatus(
-        deviceType: .iphone,
+    @Previewable @State var status = BatteryStatus(
+        deviceType: .mac,
         currentCharge: 90,
-        isCharging: true,
-        isLowPower: false,
+        isCharging: false,
+        isLowPower: true,
         estChargeTime: 30 * 60,
         estDepleteTime: 0
-    ))
-    @Previewable @State var sync = SyncStatusAsyncManager(cloudKitContainerID: "iCloud.JackKroll.BatteryShare.2")
-    SingleDeviceView(syncManager: sync, deviceStatus: status)
+    )
+    SingleDeviceView(
+        deviceStatus: status,
+        deviceNickname: BatteryStore.defaultDeviceNickname(for: status.deviceType)
+    )
 }

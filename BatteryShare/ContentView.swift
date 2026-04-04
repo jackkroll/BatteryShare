@@ -16,184 +16,141 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
     @Query private var recentStatus: [BatteryStatus]
-    @State var deviceStatus : [DeviceBatteryStatus] = []
+    @Query private var deviceNicknames: [DeviceNickname]
+    @State var deviceStatus : [BatteryStatus] = []
     @State var displaySettings: Bool = false
     @State var quotaExceeded: Bool = false
     @State private var syncManager = SyncStatusAsyncManager(
+        monitoringOptions: .syncFocused,
         cloudKitContainerID: BatteryStoreConfiguration.cloudKitContainerID,
     )
+    @State private var showSyncNotification: Bool = false
     
     var body: some View {
         NavigationStack {
             ScrollView {
-                if recentStatus.isEmpty {
-                    VStack {
-                        ContentUnavailableView("Battery Status Never Synced", systemImage: "icloud.and.arrow.down.fill")
+                VStack(spacing: 16) {
+                    if showSyncNotification {
+                        HStack {
+                            Image(systemName: "icloud.and.arrow.down.fill")
+                            Text("Syncing from iCloud")
+                        }
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .padding()
+                        .glassEffect()
+                    }
+                    if recentStatus.isEmpty {
+                        VStack {
+                            ContentUnavailableView("Battery Status Never Synced", systemImage: "icloud.and.arrow.down.fill")
                             Group {
-                                if !syncManager.isAccountAvailable && !syncManager.isCloudDriveAvailable {
-                                    Text("Please sign into iCloud on your device in Settings")
+                                if !syncManager.isNetworkConnected {
+                                    Text("Connect to the internet to check iCloud for updates.")
                                 }
-                                if syncManager.isAccountAvailable && !syncManager.isCloudDriveAvailable {
-                                    Text("Please enable iCloud Drive in Settings")
+                                if !syncManager.isAccountAvailable {
+                                    Text("Please sign into iCloud on your device in Settings.")
                                 }
-                                if syncManager.isAccountAvailable && syncManager.isCloudDriveAvailable {
-                                    Text("Install BatteryShare on your Mac to sync battery status")
+                                if syncManager.environmentStatus.isSyncReady {
+                                    Text("No battery data has been imported yet. Install BatteryShare on your Mac, then tap Check iCloud.")
+                                }
+                                if syncManager.networkStatus.isLowPowerModeEnabled {
+                                    Text("Low Power Mode can delay CloudKit sync.")
                                 }
                             }
                             .font(.subheadline)
                             .padding(.horizontal)
-                        
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 32)
-                } else {
-                    LazyVStack(spacing: 0) {
-                        ForEach(deviceStatus, id: \.status.deviceID) { device in
-                            SingleDeviceView(syncManager: syncManager, deviceStatus: device)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 16)
+                    } else {
+                        LazyVStack(spacing: 0) {
+                            ForEach(deviceStatus, id: \.deviceID) { device in
+                                SingleDeviceView(
+                                    deviceStatus: device,
+                                    deviceNickname: BatteryStore.deviceNickname(
+                                        for: device,
+                                        nicknamesByDeviceID: nicknamesByDeviceID
+                                    )
+                                )
+                            }
                         }
                     }
                 }
             }
             .refreshable {
-                await requestCloudRefresh()
+                withAnimation {
+                    deviceStatus = storeToDevices(store: recentStatus)
+                }
             }
             .padding(.horizontal)
+            .onChange(of: syncManager.isSyncing) { old, new in
+                if !old && new {
+                    withAnimation {
+                        showSyncNotification = true
+                    }
+                }
+                if old && !new {
+                    withAnimation {
+                        showSyncNotification = false
+                        deviceStatus = storeToDevices(store: recentStatus)
+                    }
+                }
+            }
+            .onChange(of: recentStatus) {
+                withAnimation {
+                    deviceStatus = storeToDevices(store: recentStatus)
+                }
+            }
             .onAppear {
-                updateDeviceStatuses()
-            }
-            .onChange(of: recentStatus) { _, _ in
-                updateDeviceStatuses()
-            }
-            .toolbar {
-                Button {
-                    try? modelContext.delete(model: BatteryStatus.self)
-                    try? modelContext.save()
-                    
-                } label: {
-                    Image(systemName: "trash")
+                withAnimation {
+                    deviceStatus = storeToDevices(store: recentStatus)
                 }
             }
         }
     }
-    
-    @MainActor
-    private func updateDeviceStatuses() {
-        // Build the most recent BatteryStatus per deviceID
-        var latestByID: [String: BatteryStatus] = [:]
-        for status in recentStatus {
-            guard let id = status.deviceID else { continue }
-            let currentDate = status.timestamp ?? .distantPast
-            let existingDate = latestByID[id]?.timestamp ?? .distantPast
-            if latestByID[id] == nil || currentDate > existingDate {
-                latestByID[id] = status
-            }
-        }
 
-        // Map to DeviceBatteryStatus and sort by most recent timestamp
-        let devices: [DeviceBatteryStatus] = latestByID.values
-            .map { status in
-                let nickname: String
-                nickname = BatteryStore.deviceNickname(for: status.deviceType)
-                return DeviceBatteryStatus(deviceNickname: nickname, status: status)
-            }
-            .sorted { (lhs, rhs) in
-                let l = lhs.status.timestamp ?? .distantPast
-                let r = rhs.status.timestamp ?? .distantPast
-                return l > r
-            }
-
-        self.deviceStatus = devices
-        BatteryWidgetReloader.reloadAllTimelines()
-    }
-    func quotaExceededNotice() -> Void {
-        quotaExceeded = true
+    private var nicknamesByDeviceID: [String: DeviceNickname] {
+        BatteryStore.nicknamesByDeviceID(from: deviceNicknames)
     }
     
-    @MainActor
-    private func requestCloudRefresh() async {
-        let startingSnapshot = StatusSnapshot(statuses: recentStatus)
-
-        syncManager.refreshCloudDriveStatus()
-        _ = try? await syncManager.checkAccountStatus()
-
-        guard syncManager.isAccountAvailable else {
-            updateDeviceStatuses()
-            return
-        }
-
-        let container = CKContainer(identifier: BatteryStoreConfiguration.cloudKitContainerID)
-
-        do {
-            // SwiftData imports are still managed automatically. This CloudKit round-trip
-            // nudges the sync stack to contact iCloud and gives incoming changes time to merge.
-            _ = try await container.privateCloudDatabase.allRecordZones()
-            await waitForImportedChanges(since: startingSnapshot)
-        } catch {
-            // Ignore manual refresh failures and fall back to the next automatic sync.
-        }
-
-        modelContext.processPendingChanges()
-        updateDeviceStatuses()
-    }
-    
-    @MainActor
-    private func waitForImportedChanges(since startingSnapshot: StatusSnapshot) async {
-        let deadline = Date.now.addingTimeInterval(4)
-        var sawSyncActivity = syncManager.isSyncing
-
-        while Date.now < deadline {
-            if StatusSnapshot(statuses: recentStatus) != startingSnapshot {
-                return
+    func storeToDevices(store: [BatteryStatus]) -> [BatteryStatus] {
+        var latestByDevice: [(String, BatteryStatus)] = []
+        print(store)
+        for status in store {
+            if let deviceID = status.deviceID {
+                if let givenStatus = latestByDevice.first(where: {$0.0 == deviceID})?.1 {
+                    if let timestamp = givenStatus.timestamp {
+                        if status.timestamp ?? .distantPast > timestamp {
+                            if let index = latestByDevice.firstIndex(where: {$0.0 == deviceID}) {
+                                latestByDevice[index] = (deviceID, status)
+                            }
+                        }
+                    
+                    } else {
+                        print("given does not have timestamp???")
+                    }
+                } else {
+                    latestByDevice.append((deviceID, status))
+                }
+                
+            } else {
+                print("no deviceID")
             }
-
-            if syncManager.isSyncing {
-                sawSyncActivity = true
-            } else if sawSyncActivity {
-                return
-            }
-
-            try? await Task.sleep(for: .milliseconds(250))
         }
-    }
-}
-
-private struct StatusSnapshot: Equatable {
-    let rows: [String]
-
-    init(statuses: [BatteryStatus]) {
-        var snapshotRows: [String] = []
-        snapshotRows.reserveCapacity(statuses.count)
-
-        for status in statuses {
-            var rowParts: [String] = []
-            rowParts.reserveCapacity(9)
-            rowParts.append(String(describing: status.persistentModelID))
-            rowParts.append(status.deviceID ?? "")
-            rowParts.append(status.deviceType?.rawValue ?? "")
-            rowParts.append(String(status.timestamp?.timeIntervalSince1970 ?? 0))
-            rowParts.append(String(status.currentCharge ?? -1))
-            rowParts.append(String(status.isCharging ?? false))
-            rowParts.append(String(status.isLowPower ?? false))
-            rowParts.append(String(status.estChargeTime ?? -1))
-            rowParts.append(String(status.estDepleteTime ?? -1))
-            snapshotRows.append(rowParts.joined(separator: "|"))
+        return latestByDevice.map { device in
+            return device.1
         }
-
-        rows = snapshotRows.sorted()
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: BatteryStatus.self, inMemory: true)
+        .modelContainer(try! BatteryStoreConfiguration.makeInMemoryModelContainer())
 }
  
 #Preview("With Example Battery Status") {
     do {
-        let container = try ModelContainer(
-            for: BatteryStatus.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
+        let container = try BatteryStoreConfiguration.makeInMemoryModelContainer()
 
         // Create a sample status (100% so that percent formatting looks correct for Int)
         let sample = BatteryStatus(
@@ -211,7 +168,7 @@ private struct StatusSnapshot: Equatable {
     } catch {
         // Fallback empty preview if the container fails to create
         return ContentView()
-            .modelContainer(for: BatteryStatus.self, inMemory: true)
+            .modelContainer(try! BatteryStoreConfiguration.makeInMemoryModelContainer())
     }
 }
 

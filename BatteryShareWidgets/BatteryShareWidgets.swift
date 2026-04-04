@@ -87,6 +87,8 @@ struct LatestBatteryWidget: Widget {
         .description("Shows the newest battery reading synced through BatteryShare.")
         .supportedFamilies([
             .systemSmall,
+            .systemMedium,
+            .systemLarge,
             .accessoryInline,
             .accessoryRectangular,
             .accessoryCircular,
@@ -137,9 +139,20 @@ private struct LatestBatteryWidgetEntryView: View {
         if let device = entry.primaryDevice {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .center) {
-                    Label(device.deviceNickname, systemImage: symbolName(for: device))
-                        .font(.headline)
-                        .lineLimit(1)
+                    ViewThatFits {
+                        Label(device.deviceNickname, systemImage: symbolName(for: device))
+                            .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                        Text(device.deviceNickname)
+                            .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                        Label(BatteryStore.defaultDeviceNickname(for: device.deviceType), systemImage: symbolName(for: device))
+                            .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
                     Spacer(minLength: 8)
                     if family == .systemLarge {
                         statusLabel(for: device)
@@ -156,10 +169,6 @@ private struct LatestBatteryWidgetEntryView: View {
                         .foregroundStyle(chargeColor(for: device))
                         .minimumScaleFactor(0.05)
                     Spacer()
-                    if family == .systemMedium {
-                        statusLabel(for: device)
-                            .frame(maxWidth: 50)
-                    }
                     
                 }
                 if family == .systemLarge {
@@ -170,11 +179,18 @@ private struct LatestBatteryWidgetEntryView: View {
                 }
                 .gaugeStyle(.linearCapacity)
                 .tint(LinearGradient(colors: [.red, .yellow, .green], startPoint: .leading, endPoint: .trailing))
-
-                Text(detailLine(for: device))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                HStack {
+                    Text(detailLine(for: device))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                    if family == .systemMedium {
+                        Spacer()
+                        statusLabel(for: device)
+                            .frame(maxWidth: 50)
+                    }
+                    
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         } else {

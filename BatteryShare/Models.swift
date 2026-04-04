@@ -9,6 +9,18 @@ import Foundation
 import SwiftData
 
 @Model
+final class DeviceNickname {
+    var deviceID: String?
+    var nickname: String = ""
+    @Relationship(inverse: \BatteryStatus.deviceNickname) var statuses: [BatteryStatus]? = []
+
+    init(deviceID: String? = nil, nickname: String = "") {
+        self.deviceID = deviceID
+        self.nickname = nickname
+    }
+}
+
+@Model
 final class BatteryStatus {
     var deviceID: String?
     var deviceType: DeviceType?
@@ -18,6 +30,7 @@ final class BatteryStatus {
     var isLowPower: Bool?
     var estChargeTime: TimeInterval?
     var estDepleteTime: TimeInterval?
+    @Relationship(deleteRule: .nullify) var deviceNickname: DeviceNickname?
     
     init(deviceType: DeviceType? = nil, currentCharge: Int? = nil, isCharging: Bool? = nil, isLowPower: Bool? = nil, estChargeTime: Double? = nil, estDepleteTime: Double? = nil) {
         self.deviceID = DeviceIdentityManager.getDeviceIdentifier()

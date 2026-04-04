@@ -27,6 +27,7 @@ struct MenuBar: View {
             Button("Sync Now") {
                 let battery = fetchBatteryStatus()
                 if let battery = battery {
+                    try? BatteryStore.ensureDeviceNickname(for: battery, in: modelContext)
                     modelContext.insert(battery)
                 }
             }
@@ -182,6 +183,6 @@ func fetchBatteryStatus() -> BatteryStatus? {
 
 #Preview {
     MenuBar()
-        .modelContainer(for: BatteryStatus.self, inMemory: true)
+        .modelContainer(try! BatteryStoreConfiguration.makeInMemoryModelContainer())
 }
 #endif

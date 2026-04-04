@@ -15,7 +15,6 @@ struct BatteryShareApp: App {
     #if os(macOS)
     @State private var scheduler = NSBackgroundActivityScheduler(identifier: "com.JackKroll.BatteryShare.report")
     #endif
-
     init() {
         do {
             sharedModelContainer = try BatteryStoreConfiguration.makeSharedModelContainer()
@@ -34,6 +33,7 @@ struct BatteryShareApp: App {
                 if let battery = fetchBatteryStatus() {
                     // Mark this entry as coming from macOS so we can prune per-device type
                     battery.deviceType = .mac
+                    try? BatteryStore.ensureDeviceNickname(for: battery, in: container.mainContext)
                     container.mainContext.insert(battery)
                     do {
                         try container.mainContext.save()
@@ -70,7 +70,7 @@ struct BatteryShareApp: App {
         }
         #endif
     }
-
+    
     var body: some Scene {
         #if os(macOS)
         MenuBarExtra("Test" ,systemImage: "bolt.fill"){

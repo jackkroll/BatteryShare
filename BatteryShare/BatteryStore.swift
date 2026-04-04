@@ -12,13 +12,23 @@ import WidgetKit
 #endif
 
 enum BatteryStoreConfiguration {
-    static let cloudKitContainerID = "iCloud.JackKroll.BatteryShare.2"
+    static let cloudKitContainerID = "iCloud.JackKroll.BatteryShare.3"
     static let appGroupID = "group.com.JackKroll.BatteryShare"
     static let storeName = cloudKitContainerID
 
     static let schema = Schema([
         BatteryStatus.self,
+        DeviceNickname.self,
     ])
+
+    static func makeInMemoryModelContainer() throws -> ModelContainer {
+        try ModelContainer(
+            for: schema,
+            configurations: [
+                ModelConfiguration(isStoredInMemoryOnly: true)
+            ]
+        )
+    }
 
     static func makeSharedModelContainer() throws -> ModelContainer {
         let modelConfiguration = ModelConfiguration(
@@ -32,6 +42,7 @@ enum BatteryStoreConfiguration {
 
         return try ModelContainer(for: schema, configurations: [modelConfiguration])
     }
+
 }
 
 struct BatteryDeviceSnapshot: Identifiable, Hashable {
@@ -47,11 +58,10 @@ struct BatteryDeviceSnapshot: Identifiable, Hashable {
 }
 
 enum BatteryStore {
-    static func deviceNickname(for type: BatteryStatus.DeviceType?) -> String {
+    static func defaultDeviceNickname(for type: BatteryStatus.DeviceType?) -> String {
         guard let type else {
             return "Device"
         }
-
         switch type {
         case .iphone:
             return "My iPhone"
@@ -59,6 +69,62 @@ enum BatteryStore {
             return "My Mac"
         case .ipad:
             return "My iPad"
+        }
+    }
+
+    static func deviceNickname(
+        for status: BatteryStatus,
+        nicknamesByDeviceID: [String: DeviceNickname] = [:]
+    ) -> String {
+        if let deviceID = status.deviceID,
+           let nickname = sanitizedNickname(nicknamesByDeviceID[deviceID]?.nickname) {
+            return nickname
+        }
+
+        if let nickname = sanitizedNickname(status.deviceNickname?.nickname) {
+            return nickname
+        }
+
+        return defaultDeviceNickname(for: status.deviceType)
+    }
+
+    static func nicknamesByDeviceID(from nicknames: [DeviceNickname]) -> [String: DeviceNickname] {
+        nicknames.reduce(into: [:]) { partialResult, nickname in
+            guard let deviceID = nickname.deviceID else {
+                return
+            }
+            partialResult[deviceID] = nickname
+        }
+    }
+
+    static func fetchNicknamesByDeviceID(from context: ModelContext) throws -> [String: DeviceNickname] {
+        try nicknamesByDeviceID(from: context.fetch(FetchDescriptor<DeviceNickname>()))
+    }
+
+    static func ensureDeviceNickname(for status: BatteryStatus, in context: ModelContext) throws {
+        guard let deviceID = status.deviceID else {
+            return
+        }
+
+        if let existingNickname = status.deviceNickname {
+            if existingNickname.deviceID == nil {
+                existingNickname.deviceID = deviceID
+            }
+            return
+        }
+
+        var descriptor = FetchDescriptor<DeviceNickname>(
+            predicate: #Predicate { nickname in
+                nickname.deviceID == deviceID
+            }
+        )
+        descriptor.fetchLimit = 1
+
+        if let existingNickname = try context.fetch(descriptor).first {
+            status.deviceNickname = existingNickname
+            if existingNickname.deviceID == nil {
+                existingNickname.deviceID = deviceID
+            }
         }
     }
 
@@ -70,11 +136,18 @@ enum BatteryStore {
             sortBy: [SortDescriptor(\BatteryStatus.timestamp, order: .reverse)]
         )
 
-        return latestSnapshots(from: try context.fetch(descriptor), limit: limit)
+        let nicknamesByDeviceID = try fetchNicknamesByDeviceID(from: context)
+
+        return latestSnapshots(
+            from: try context.fetch(descriptor),
+            nicknamesByDeviceID: nicknamesByDeviceID,
+            limit: limit
+        )
     }
 
     static func latestSnapshots(
         from statuses: [BatteryStatus],
+        nicknamesByDeviceID: [String: DeviceNickname] = [:],
         limit: Int? = nil
     ) -> [BatteryDeviceSnapshot] {
         var seenDeviceIDs = Set<String>()
@@ -97,7 +170,10 @@ enum BatteryStore {
             snapshots.append(
                 BatteryDeviceSnapshot(
                     id: deviceID,
-                    deviceNickname: deviceNickname(for: status.deviceType),
+                    deviceNickname: deviceNickname(
+                        for: status,
+                        nicknamesByDeviceID: nicknamesByDeviceID
+                    ),
                     deviceType: status.deviceType,
                     timestamp: status.timestamp,
                     currentCharge: status.currentCharge,
@@ -114,6 +190,15 @@ enum BatteryStore {
         }
 
         return snapshots
+    }
+
+    private static func sanitizedNickname(_ nickname: String?) -> String? {
+        guard let nickname else {
+            return nil
+        }
+
+        let trimmedNickname = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedNickname.isEmpty ? nil : trimmedNickname
     }
 }
 
