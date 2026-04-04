@@ -101,6 +101,19 @@ enum BatteryStore {
         try nicknamesByDeviceID(from: context.fetch(FetchDescriptor<DeviceNickname>()))
     }
 
+    static func fetchDeviceNickname(
+        for deviceID: String,
+        in context: ModelContext
+    ) throws -> DeviceNickname? {
+        var descriptor = FetchDescriptor<DeviceNickname>(
+            predicate: #Predicate { nickname in
+                nickname.deviceID == deviceID
+            }
+        )
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
+    }
+
     static func ensureDeviceNickname(for status: BatteryStatus, in context: ModelContext) throws {
         guard let deviceID = status.deviceID else {
             return
@@ -113,19 +126,39 @@ enum BatteryStore {
             return
         }
 
-        var descriptor = FetchDescriptor<DeviceNickname>(
-            predicate: #Predicate { nickname in
-                nickname.deviceID == deviceID
-            }
-        )
-        descriptor.fetchLimit = 1
-
-        if let existingNickname = try context.fetch(descriptor).first {
+        if let existingNickname = try fetchDeviceNickname(for: deviceID, in: context) {
             status.deviceNickname = existingNickname
             if existingNickname.deviceID == nil {
                 existingNickname.deviceID = deviceID
             }
         }
+    }
+
+    static func updateDeviceNickname(
+        for status: BatteryStatus,
+        to nickname: String,
+        in context: ModelContext
+    ) throws {
+        guard let deviceID = status.deviceID else {
+            status.deviceNickname?.nickname = nickname
+            return
+        }
+
+        let existingNickname = try fetchDeviceNickname(for: deviceID, in: context)
+        let deviceNickname: DeviceNickname
+        if let existingNickname = status.deviceNickname ?? existingNickname {
+            deviceNickname = existingNickname
+            if deviceNickname.deviceID == nil {
+                deviceNickname.deviceID = deviceID
+            }
+        } else {
+            let newNickname = DeviceNickname(deviceID: deviceID, nickname: nickname)
+            context.insert(newNickname)
+            deviceNickname = newNickname
+        }
+
+        deviceNickname.nickname = nickname
+        status.deviceNickname = deviceNickname
     }
 
     static func fetchLatestSnapshots(

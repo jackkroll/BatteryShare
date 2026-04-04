@@ -25,21 +25,12 @@ struct ContentView: View {
         cloudKitContainerID: BatteryStoreConfiguration.cloudKitContainerID,
     )
     @State private var showSyncNotification: Bool = false
+    @State private var startedSyncNotif: Date? = nil
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    if showSyncNotification {
-                        HStack {
-                            Image(systemName: "icloud.and.arrow.down.fill")
-                            Text("Syncing from iCloud")
-                        }
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .padding()
-                        .glassEffect()
-                    }
                     if recentStatus.isEmpty {
                         VStack {
                             ContentUnavailableView("Battery Status Never Synced", systemImage: "icloud.and.arrow.down.fill")
@@ -76,6 +67,21 @@ struct ContentView: View {
                         }
                     }
                 }
+                .toolbar {
+                    ToolbarItem(placement: .status){
+                        if showSyncNotification {
+                                HStack {
+                                    Image(systemName: "icloud.and.arrow.down.fill")
+                                    Text("Syncing from iCloud")
+                                }
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .fixedSize(horizontal: true, vertical: false)
+                                .padding()
+                                
+                        }
+                    }
+                }
             }
             .refreshable {
                 withAnimation {
@@ -87,11 +93,22 @@ struct ContentView: View {
                 if !old && new {
                     withAnimation {
                         showSyncNotification = true
+                        startedSyncNotif = .now
                     }
                 }
                 if old && !new {
                     withAnimation {
-                        showSyncNotification = false
+                        if startedSyncNotif?.distance(to: .now) ?? 2 > 1 {
+                            showSyncNotification = false
+                        }
+                        else {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + (1.0 - (startedSyncNotif?.distance(to: .now) ?? 0))) {
+                                withAnimation {
+                                    showSyncNotification = false
+                                }
+                            }
+                        }
+                        
                         deviceStatus = storeToDevices(store: recentStatus)
                     }
                 }
@@ -115,7 +132,6 @@ struct ContentView: View {
     
     func storeToDevices(store: [BatteryStatus]) -> [BatteryStatus] {
         var latestByDevice: [(String, BatteryStatus)] = []
-        print(store)
         for status in store {
             if let deviceID = status.deviceID {
                 if let givenStatus = latestByDevice.first(where: {$0.0 == deviceID})?.1 {
@@ -126,15 +142,11 @@ struct ContentView: View {
                             }
                         }
                     
-                    } else {
-                        print("given does not have timestamp???")
                     }
                 } else {
                     latestByDevice.append((deviceID, status))
                 }
                 
-            } else {
-                print("no deviceID")
             }
         }
         return latestByDevice.map { device in

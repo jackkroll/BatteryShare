@@ -24,7 +24,17 @@ struct MenuBar: View {
             else {
                 Text("Not synced yet")
             }
+            let selfCount = battery.filter({$0.deviceID == DeviceIdentityManager.getDeviceIdentifier()}).count
             Button("Sync Now") {
+                let maxLength = 5
+                let toPrune = battery.filter({$0.deviceID == DeviceIdentityManager.getDeviceIdentifier()}).dropFirst(maxLength)
+                
+                for pruned in toPrune {
+                    modelContext.delete(pruned)
+                }
+                
+                try? modelContext.save()
+                
                 let battery = fetchBatteryStatus()
                 if let battery = battery {
                     try? BatteryStore.ensureDeviceNickname(for: battery, in: modelContext)
@@ -139,6 +149,9 @@ struct MenuBarLabel: View {
         let days = hours / 24
         return "\(days)d"
     }
+}
+
+func insertBatteryStatus(status: BatteryStatus) {
 }
 
 func fetchBatteryStatus() -> BatteryStatus? {

@@ -48,15 +48,16 @@ struct BatteryShareApp: App {
                 do {
                     let descriptor = FetchDescriptor<BatteryStatus>()
                     let allEntries = try container.mainContext.fetch(descriptor)
-                    let macEntries = allEntries.filter { $0.deviceType == .some(BatteryStatus.DeviceType.mac) }
+                    let selfEntires = allEntries.filter { $0.deviceID == DeviceIdentityManager.getDeviceIdentifier()  }
 
                     // Sort by timestamp descending (treat nil as distant past)
-                    let sorted = macEntries.sorted { (a, b) in
+                    let sorted = selfEntires.sorted { (a, b) in
                         (a.timestamp ?? .distantPast) > (b.timestamp ?? .distantPast)
                     }
-
-                    if sorted.count > 10 {
-                        for old in sorted.dropFirst(10) {
+                    
+                    let maxLength = 10
+                    if sorted.count > maxLength {
+                        for old in sorted.dropFirst(maxLength) {
                             container.mainContext.delete(old)
                         }
                         try? container.mainContext.save()

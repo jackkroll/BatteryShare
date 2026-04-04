@@ -22,7 +22,7 @@ struct SettingSheet: View {
                     Text("Device Name")
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle("Device Settings")
             #if !os(macOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -40,15 +40,12 @@ struct SettingSheet: View {
                 )
             }
             .onChange(of: nickname) {
-                if batteryStatus.deviceNickname != nil {
-                    batteryStatus.deviceNickname?.nickname = nickname
-                    try? modelContext.save()
-                }
-                else {
-                    batteryStatus.deviceNickname = DeviceNickname(deviceID: batteryStatus.deviceID, nickname: nickname)
-                    try? modelContext.save()
-                }
-                
+                try? BatteryStore.updateDeviceNickname(
+                    for: batteryStatus,
+                    to: nickname,
+                    in: modelContext
+                )
+                try? modelContext.save()
             }
         }
     }
