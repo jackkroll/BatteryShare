@@ -110,12 +110,13 @@ struct SingleDeviceView: View {
                 }
                 .frame(maxHeight: 144)
             }
-            if let timeUntilEmpty = deviceStatus.estDepleteTime,
+            if let timestamp = deviceStatus.timestamp,
+               let timeUntilEmpty = deviceStatus.estDepleteTime,
                let timeUntilCharge = deviceStatus.estChargeTime {
                 Group {
                     if timeUntilCharge > 0 {
                         VStack {
-                            Text(Date.now.advanced(by: timeUntilCharge), style: .relative)
+                            Text(timestamp.advanced(by: timeUntilCharge), style: .relative)
                                 .font(.title)
                                 .bold()
                             Text("until fully charged")
@@ -124,7 +125,7 @@ struct SingleDeviceView: View {
                     }
                     if timeUntilEmpty > 0 {
                         VStack {
-                            Text(Date.now.advanced(by: timeUntilEmpty), style: .relative)
+                            Text(timestamp.advanced(by: timeUntilEmpty), style: .relative)
                                 .font(.title)
                                 .bold()
                             Text("until empty")

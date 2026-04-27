@@ -77,7 +77,7 @@ struct BatteryShareWidgetsBundle: WidgetBundle {
 }
 
 struct LatestBatteryWidget: Widget {
-    private let kind = "BatteryShareLatestBatteryWidget"
+    private let kind = BatteryWidgetKind.latestBattery
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BatteryStatusProvider()) { entry in
@@ -97,7 +97,7 @@ struct LatestBatteryWidget: Widget {
 }
 
 struct BatteryOverviewWidget: Widget {
-    private let kind = "BatteryShareOverviewWidget"
+    private let kind = BatteryWidgetKind.overview
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BatteryStatusProvider()) { entry in
@@ -445,15 +445,19 @@ private func chargeColor(for device: BatteryDeviceSnapshot) -> Color {
 
 private func detailLine(for device: BatteryDeviceSnapshot) -> String {
     if device.isCharging {
-        if let estChargeTime = device.estChargeTime, estChargeTime > 0 {
-            return "Charging, full in \(relativeDurationText(for: estChargeTime))"
+        if let timestamp = device.timestamp,
+           let estChargeTime = device.estChargeTime,
+           timestamp.advanced(by: estChargeTime) > .now {
+            return "Charging, full in \(relativeDurationText(for: Date.now.distance(to: timestamp.advanced(by: estChargeTime))))"
         }
 
         return "Charging now"
     }
 
-    if let estDepleteTime = device.estDepleteTime, estDepleteTime > 0 {
-        return "On battery, empty in \(relativeDurationText(for: estDepleteTime))"
+    if let timestamp = device.timestamp,
+       let estDepleteTime = device.estDepleteTime,
+       timestamp.advanced(by: estDepleteTime) > .now {
+        return "On battery, empty in \(relativeDurationText(for: Date.now.distance(to: timestamp.advanced(by: estDepleteTime))))"
     }
 
     if device.isLowPower {

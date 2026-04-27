@@ -11,6 +11,9 @@ import SwiftData
 @main
 struct BatteryShareApp: App {
     private let sharedModelContainer: ModelContainer
+    #if os(iOS)
+    @UIApplicationDelegateAdaptor(BatteryShareAppDelegate.self) private var appDelegate
+    #endif
 
     #if os(macOS)
     @State private var scheduler = NSBackgroundActivityScheduler(identifier: "com.JackKroll.BatteryShare.report")
@@ -37,7 +40,7 @@ struct BatteryShareApp: App {
                     container.mainContext.insert(battery)
                     do {
                         try container.mainContext.save()
-                        BatteryWidgetReloader.reloadAllTimelines()
+                        BatteryWidgetReloader.requestReload()
                     } catch {
                         completion(.deferred)
                         return
@@ -61,7 +64,7 @@ struct BatteryShareApp: App {
                             container.mainContext.delete(old)
                         }
                         try? container.mainContext.save()
-                        BatteryWidgetReloader.reloadAllTimelines()
+                        BatteryWidgetReloader.requestReload()
                     }
                 } catch {
                     // Ignore pruning errors; the next cycle can try again

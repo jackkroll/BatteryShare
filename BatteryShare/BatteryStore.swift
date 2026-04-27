@@ -57,6 +57,11 @@ struct BatteryDeviceSnapshot: Identifiable, Hashable {
     let estDepleteTime: TimeInterval?
 }
 
+enum BatteryWidgetKind {
+    static let latestBattery = "BatteryShareLatestBatteryWidget"
+    static let overview = "BatteryShareOverviewWidget"
+}
+
 enum BatteryStore {
     static func defaultDeviceNickname(for type: BatteryStatus.DeviceType?) -> String {
         guard let type else {
@@ -236,9 +241,44 @@ enum BatteryStore {
 }
 
 enum BatteryWidgetReloader {
-    static func reloadAllTimelines() {
+    private static let backgroundMinimumInterval: TimeInterval = 15 * 60
+    private static let lastReloadDateKey = "BatteryWidgetLastReloadDate"
+
+    static func requestReload(force: Bool = false, isAppActive: Bool = false) {
         #if canImport(WidgetKit)
-        WidgetCenter.shared.reloadAllTimelines()
+        let now = Date()
+
+        if force || shouldReloadImmediately(at: now, isAppActive: isAppActive) {
+            recordReloadDate(now)
+            reloadTimelines()
+        }
         #endif
     }
+
+    #if canImport(WidgetKit)
+    private static func reloadTimelines() {
+        WidgetCenter.shared.reloadTimelines(ofKind: BatteryWidgetKind.latestBattery)
+        WidgetCenter.shared.reloadTimelines(ofKind: BatteryWidgetKind.overview)
+    }
+
+    private static func shouldReloadImmediately(at now: Date, isAppActive: Bool) -> Bool {
+        if isAppActive {
+            return true
+        }
+
+        guard let lastReloadDate = reloadDefaults.object(forKey: lastReloadDateKey) as? Date else {
+            return true
+        }
+
+        return now.timeIntervalSince(lastReloadDate) >= backgroundMinimumInterval
+    }
+
+    private static func recordReloadDate(_ date: Date) {
+        reloadDefaults.set(date, forKey: lastReloadDateKey)
+    }
+
+    private static var reloadDefaults: UserDefaults {
+        UserDefaults(suiteName: BatteryStoreConfiguration.appGroupID) ?? .standard
+    }
+    #endif
 }

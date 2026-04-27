@@ -54,6 +54,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
+				BatteryWidgetSyncController.swift,
 				BatteryShare.icon,
 				BatteryShareApp.swift,
 				ContentView.swift,
